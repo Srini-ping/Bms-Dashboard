@@ -347,7 +347,6 @@ body {
             </div>
         </div>
 
-        <!-- Trend Sections -->
         <div class="card section" id="ups-trend">
             <h2>📈 UPS Master Trend Dashboard</h2>
             <div class="chart-controls">
@@ -399,7 +398,6 @@ body {
             <div class="chart-wrapper"><canvas id="chart-dg-combined"></canvas></div>
         </div>
 
-        <!-- Data Entry Sections -->
         <div class="card section" id="ups">
             <img src="UPS.png" alt="UPS System Overview" class="overview-img" style="max-height: none; width: 100%;" onerror="this.onerror=null; this.src='https://via.placeholder.com/1200x400.png?text=UPS+Feature+Image+(UPS.png)';">
             <h2>UPS System Monitoring</h2>
@@ -586,7 +584,7 @@ function showSection(id){
 // ==========================================
 // CONFIGURATION & GOOGLE SHEETS
 // ==========================================
-const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZXsoM8lWWgE4YWoNJXm2zLRfBkpPdH_tM9RL9AaQEptZxit8cIpy6v0vv8fpYIol8og/exec";
+const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6DVV9-qz33F8Ixd76WiaA5-xtueOOurJej3YXJyGnL1cfVsqCXKKsp9NzYBm1EWNH6A/exec";
 
 const upsConfigs = {
     'u1': { name: 'UPS 1 (200kVA Socomec)', capacity: 200, color: '#2563EB' }, 'u2': { name: 'UPS 2 (200kVA Socomec)', capacity: 200, color: '#3B82F6' },
@@ -796,7 +794,6 @@ function renderMaintenanceUI() {
             <h4>🌍 Global Reports for All ${eq.category} Units</h4>
             <div class="report-btns">
                 <button class="action-btn btn-export" style="background:var(--primary);" onclick="exportGlobalMaint('${eq.category}')">📥 Export All ${eq.category} Data</button>
-                <button class="action-btn btn-email" style="background:var(--text-dark);" onclick="emailGlobalMaint('${eq.category}')">✉️ Email All ${eq.category} Data</button>
             </div>
         </div>
     </div>`;
@@ -843,12 +840,15 @@ function populateMaintenanceTable(eqId, category) {
 
 function exportMaintenanceData(eqId, category) {
     if(!isAdmin) return alert("Admin Login Required."); let records = maintenanceData[eqId].records; if(records.length === 0) return alert("No data to export.");
-    let csv = ""; let eqName = equipmentList[eqId].name;
-    csv = `LOG DATA FOR: ${eqName}\n`;
-    let link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `${eqName.replace(/\s+/g, '_')}_Report.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    let csv = `LOG DATA FOR: ${equipmentList[eqId].name}\n`;
+    csv += "Date,User,Details\n";
+    records.forEach(r => { csv += `${r.logDate},${r.user},Data Logged\n`; });
+    downloadCSV(csv, `${equipmentList[eqId].name.replace(/\s+/g, '_')}_Report.csv`);
 }
-function exportGlobalMaint(category) { alert("Global Export Initialized (Logic retained)."); }
-function emailGlobalMaint(category) { alert("Global Email Initialized (Logic retained)."); }
+function exportGlobalMaint(category) { 
+    let csv = `Global Maintenance Report for ${category}\n`;
+    downloadCSV(csv, `Global_${category}_Report.csv`);
+}
 
 // ==========================================
 // DG SETS MODULE
@@ -870,7 +870,7 @@ function renderDgUI() {
         <div class="report-panel" id="report-panel-${dgId}">
             <div class="admin-lock-overlay" id="lock-dg-rep-${dgId}"><button class="admin-lock-btn" onclick="showAdminLogin()">🔒 Admin Login Required for Reports</button></div>
             <h4>Generate ${dgId.toUpperCase()} Log Report</h4>
-            <div class="report-btns"><button class="action-btn btn-export" onclick="exportDgData('${dgId}')">📥 Export CSV</button><button class="action-btn btn-email" onclick="emailDgReport('${dgId}')">✉️ Email Report</button></div>
+            <div class="report-btns"><button class="action-btn btn-export" onclick="exportDgData('${dgId}')">📥 Export CSV</button></div>
         </div>
     </div>`;
     if(isAdmin) document.getElementById(`lock-dg-rep-${dgId}`).classList.add("hidden");
@@ -883,10 +883,30 @@ function saveDgData(dgId) {
     document.getElementById(`${dgId}-rh`).value = ""; document.getElementById(`${dgId}-fuel`).value = ""; document.getElementById(`${dgId}-batt`).value = ""; document.getElementById(`${dgId}-load`).value = "";
     alert("DG Data Saved."); if(combinedDgChartInstance) updateCombinedDgChart();
 }
-function exportDgData(dgId) { alert("Exporting DG Data"); }
-function emailDgReport(dgId) { alert("Emailing DG Report"); }
+function exportDgData(dgId) {
+    let records = dgData[dgId].records; if(records.length === 0) return alert("No data to export");
+    let csv = "Date,Time,Status,Running Hours,Fuel Level,Battery Volts,Load (kVA),User\n";
+    records.forEach(r => csv += `${r.date},${r.time},${r.status},${r.rh},${r.fuel},${r.batt},${r.load},${r.user}\n`);
+    downloadCSV(csv, `${dgId.toUpperCase()}_Report.csv`);
+}
 function initCombinedDgChart() { let ctx = document.getElementById('chart-dg-combined').getContext('2d'); combinedDgChartInstance = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } }); updateCombinedDgChart(); }
-function updateCombinedDgChart() { /* Chart update logic retained */ }
+function updateCombinedDgChart() {
+    if(!combinedDgChartInstance) return;
+    let type = document.getElementById("all-dg-chart-type").value;
+    let filter = document.getElementById("all-dg-time-filter").value;
+    let labels = new Set(); let datasets = [];
+    
+    Object.keys(dgConfigs).forEach(dgId => {
+        let filtered = filterRecordsByTime(dgData[dgId].records, filter);
+        let dataMap = {};
+        filtered.forEach(r => { let label = r.date + " " + r.time; labels.add(label); dataMap[label] = parseFloat(r.load) || 0; });
+        datasets.push({ label: dgConfigs[dgId].name + ' Load', data: dataMap, borderColor: dgConfigs[dgId].color, backgroundColor: dgConfigs[dgId].color + '33', fill: type==='line' });
+    });
+    
+    let sortedLabels = Array.from(labels).sort();
+    datasets.forEach(ds => { let d = []; sortedLabels.forEach(l => d.push(ds.data[l] || 0)); ds.data = d; });
+    combinedDgChartInstance.config.type = type; combinedDgChartInstance.data.labels = sortedLabels; combinedDgChartInstance.data.datasets = datasets; combinedDgChartInstance.update();
+}
 
 // ==========================================
 // HVAC LOGGING MODULE
@@ -940,11 +960,44 @@ function renderHvacUI() {
         if(isAdmin) document.getElementById('lock-hvac-zones').classList.add('hidden');
     }
 }
-function saveChillerLog() { /* Logic retained */ }
-function saveZoneLog() { /* Logic retained */ }
-function exportHvacData(type) { /* Logic retained */ }
+function saveChillerLog() {
+    let now = new Date();
+    let record = {
+        date: now.toISOString().split('T')[0], time: now.toLocaleTimeString(),
+        c1: document.getElementById('hvac-c1').value, c2: document.getElementById('hvac-c2').value,
+        p1: document.getElementById('hvac-p1').value, p2: document.getElementById('hvac-p2').value,
+        chwIn: document.getElementById('hvac-chwin').value || 0, chwOut: document.getElementById('hvac-chwout').value || 0,
+        user: activeUser || "Admin"
+    };
+    hvacData.chillerLogs.push(record); localStorage.setItem("bmsHvacData", JSON.stringify(hvacData));
+    alert("Chiller Log Saved."); renderHvacUI();
+}
+function saveZoneLog() {
+    let now = new Date(); let zData = [];
+    hvacZones.forEach((z, i) => { zData.push({ t: document.getElementById(`z-temp-${i}`).value || 0, h: document.getElementById(`z-hum-${i}`).value || 0 }); });
+    hvacData.zoneLogs.push({ date: now.toISOString().split('T')[0], time: now.toLocaleTimeString(), data: zData, user: activeUser || "Admin" });
+    localStorage.setItem("bmsHvacData", JSON.stringify(hvacData)); alert("Zone Log Saved."); renderHvacUI(); updateCombinedHvacChart();
+}
+function exportHvacData(type) {
+    if(type === 'chiller') {
+        let csv = "Date,Time,User,Chiller 1,Chiller 2,Pump 1,Pump 2,CHW In,CHW Out\n";
+        hvacData.chillerLogs.forEach(r => csv += `${r.date},${r.time},${r.user},${r.c1},${r.c2},${r.p1},${r.p2},${r.chwIn},${r.chwOut}\n`);
+        downloadCSV(csv, "Chiller_Log_Report.csv");
+    } else {
+        let csv = "Date,Time,User," + hvacZones.map(z=>z+" Temp,"+z+" Hum").join(",") + "\n";
+        hvacData.zoneLogs.forEach(r => { let row = `${r.date},${r.time},${r.user}`; r.data.forEach(d => row += `,${d.t},${d.h}`); csv += row + "\n"; });
+        downloadCSV(csv, "Zone_Log_Report.csv");
+    }
+}
 function initCombinedHvacChart() { let ctx = document.getElementById('chart-hvac-combined').getContext('2d'); combinedHvacChartInstance = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, scales: { y: { beginAtZero: false } } } }); updateCombinedHvacChart(); }
-function updateCombinedHvacChart() { /* Logic retained */ }
+function updateCombinedHvacChart() {
+    if(!combinedHvacChartInstance) return;
+    let filter = document.getElementById("all-hvac-time-filter").value; let type = document.getElementById("all-hvac-chart-type").value;
+    let filtered = filterRecordsByTime(hvacData.zoneLogs, filter);
+    let labels = filtered.map(r => r.date + " " + r.time);
+    let datasets = hvacZones.map((z, i) => { return { label: z + ' Temp (°C)', data: filtered.map(r => r.data[i].t), borderColor: hvacColors[i], fill: false }; });
+    combinedHvacChartInstance.config.type = type; combinedHvacChartInstance.data.labels = labels; combinedHvacChartInstance.data.datasets = datasets; combinedHvacChartInstance.update();
+}
 
 // ==========================================
 // DYNAMIC UPS & POWER LOGIC 
@@ -966,8 +1019,7 @@ function renderUpsUI() {
         <div class="report-panel" id="report-panel-${upsId}">
             <div class="admin-lock-overlay" id="lock-${upsId}"><button class="admin-lock-btn" onclick="showAdminLogin()">🔒 Admin Login Required</button></div>
             <h4>Generate UPS Log Report</h4>
-            <div class="report-inputs"><label>Date: <input type="date" id="${upsId}-rep-date"></label><label>Time: <input type="time" id="${upsId}-rep-time"></label></div>
-            <div class="report-btns"><button class="action-btn btn-export" onclick="exportData('${upsId}')">📥 Export CSV</button><button class="action-btn btn-email" onclick="emailReport('${upsId}')">✉️ Email Report</button></div>
+            <div class="report-btns"><button class="action-btn btn-export" onclick="exportData('${upsId}')">📥 Export CSV</button></div>
         </div>
     </div>`;
     container.innerHTML = html; let log = clearLogs[upsId]; if(log) document.getElementById(upsId + "-clear-log").innerText = `[History cleared by: ${log.user} on ${log.time}]`;
@@ -994,7 +1046,6 @@ function renderPowerUI() {
             <div class="stats-row" style="margin-top:15px;">
                 <div class="stat-box"><span class="lbl">Latest KVA</span><span class="val" id="${pId}-power-lastkva" style="color:var(--primary);">0</span></div>
                 <div class="stat-box"><span class="lbl">Max KVA</span><span class="val" id="${pId}-power-max" style="color:var(--danger);">0</span></div>
-                <div class="stat-box"><span class="lbl">Min KVA</span><span class="val" id="${pId}-power-min" style="color:var(--success);">0</span></div>
                 <div class="stat-box"><span class="lbl">Total Units (kWh)</span><span class="val" id="${pId}-power-kwh" style="color:var(--warning);">0</span></div>
             </div>
             <div class="chart-wrapper"><canvas id="chart-power-${pId}"></canvas></div>
@@ -1002,33 +1053,101 @@ function renderPowerUI() {
         <div class="report-panel" id="report-panel-power-${pId}">
             <div class="admin-lock-overlay" id="lock-power-${pId}"><button class="admin-lock-btn" onclick="showAdminLogin()">🔒 Admin Login Required</button></div>
             <h4>Generate Power Trend Report</h4>
-            <div class="report-inputs"><label>Date: <input type="date" id="${pId}-power-rep-date"></label></div>
-            <div class="report-btns"><button class="action-btn btn-export" onclick="exportPowerData('${pId}')">📥 Export CSV</button><button class="action-btn btn-email" onclick="emailPowerReport('${pId}')">✉️ Email Report</button></div>
+            <div class="report-btns"><button class="action-btn btn-export" onclick="exportPowerData('${pId}')">📥 Export CSV</button></div>
         </div>
     </div>`;
     container.innerHTML = html; initPowerChart(pId); applyPowerFilters(pId); 
     if(isAdmin) document.getElementById(`lock-power-${pId}`).classList.add("hidden");
 }
 
-function saveAndCalculatePower(pId) { /* Logic retained */ }
-function clearPowerData(pId) { /* Logic retained */ }
+function saveAndCalculatePower(pId) {
+    let r = parseFloat(document.getElementById(pId + "-amp-r").value) || 0;
+    let y = parseFloat(document.getElementById(pId + "-amp-y").value) || 0;
+    let b = parseFloat(document.getElementById(pId + "-amp-b").value) || 0;
+    let kva = ((r + y + b) * 415 * 1.732 / 1000).toFixed(2);
+    let now = new Date();
+    powerData[pId].records.push({ date: now.toISOString().split('T')[0], time: now.toLocaleTimeString(), r: r, y: y, b: b, kva: kva, kwh: (kva * 0.5).toFixed(2), user: activeUser || "Admin" });
+    localStorage.setItem("bmsPowerData", JSON.stringify(powerData));
+    alert("Power Data Saved! kVA: " + kva);
+    applyPowerFilters(pId); updateCombinedPowerChart();
+}
+function clearPowerData(pId) {
+    if(confirm("Clear history for this power panel?")) {
+        powerData[pId].records = []; localStorage.setItem("bmsPowerData", JSON.stringify(powerData)); renderPowerUI();
+    }
+}
 function initPowerChart(pId) { let ctx = document.getElementById('chart-power-' + pId).getContext('2d'); let color = powerConfigs[pId].color; currentPowerChart = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [{ label: `${powerConfigs[pId].name} Load (kVA)`, data: [], borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.2 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } }); }
-function applyPowerFilters(pId) { /* Logic retained */ }
-function exportCombinedPowerData() { /* Logic retained */ }
-function exportPowerData(pId) { /* Logic retained */ }
-function emailPowerReport(pId) { /* Logic retained */ }
+function applyPowerFilters(pId) {
+    if(!currentPowerChart) return;
+    let filter = document.getElementById(pId + "-power-time-filter").value; let type = document.getElementById(pId + "-power-chart-type").value;
+    let filtered = filterRecordsByTime(powerData[pId].records, filter);
+    let max = 0; let totalKwh = 0; let lastKva = filtered.length > 0 ? filtered[filtered.length-1].kva : 0;
+    filtered.forEach(r => { if(parseFloat(r.kva) > max) max = parseFloat(r.kva); totalKwh += parseFloat(r.kwh); });
+    
+    document.getElementById(pId + "-power-lastkva").innerText = lastKva; document.getElementById(pId + "-power-max").innerText = max.toFixed(2); document.getElementById(pId + "-power-kwh").innerText = totalKwh.toFixed(2);
+    
+    currentPowerChart.config.type = type; currentPowerChart.data.labels = filtered.map(r => r.date + " " + r.time); currentPowerChart.data.datasets[0].data = filtered.map(r => r.kva); currentPowerChart.update();
+}
+function exportCombinedPowerData() {
+    let csv = "Panel,Date,Time,R Amps,Y Amps,B Amps,kVA,kWh,User\n";
+    ['eb1', 'eb2'].forEach(pId => { powerData[pId].records.forEach(r => csv += `${pId.toUpperCase()},${r.date},${r.time},${r.r},${r.y},${r.b},${r.kva},${r.kwh},${r.user}\n`); });
+    downloadCSV(csv, "Combined_Power_Report.csv");
+}
+function exportPowerData(pId) {
+    let csv = "Date,Time,R Amps,Y Amps,B Amps,kVA,kWh,User\n";
+    powerData[pId].records.forEach(r => csv += `${r.date},${r.time},${r.r},${r.y},${r.b},${r.kva},${r.kwh},${r.user}\n`);
+    downloadCSV(csv, `${pId.toUpperCase()}_Report.csv`);
+}
 function initCombinedPowerChart() { let ctx = document.getElementById('chart-power-combined').getContext('2d'); combinedPowerChartInstance = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } }); updateCombinedPowerChart(); }
-function updateCombinedPowerChart() { /* Logic retained */ }
+function updateCombinedPowerChart() {
+    if(!combinedPowerChartInstance) return;
+    let filter = document.getElementById("all-power-time-filter").value; let type = document.getElementById("all-power-chart-type").value;
+    let labels = new Set(); let datasets = [];
+    ['eb1', 'eb2'].forEach(pId => {
+        let filtered = filterRecordsByTime(powerData[pId].records, filter); let dataMap = {};
+        filtered.forEach(r => { let label = r.date + " " + r.time; labels.add(label); dataMap[label] = r.kva; });
+        datasets.push({ label: powerConfigs[pId].name, data: dataMap, borderColor: powerConfigs[pId].color, fill: false });
+    });
+    let sortedLabels = Array.from(labels).sort();
+    datasets.forEach(ds => { let d = []; sortedLabels.forEach(l => d.push(ds.data[l] || 0)); ds.data = d; });
+    combinedPowerChartInstance.config.type = type; combinedPowerChartInstance.data.labels = sortedLabels; combinedPowerChartInstance.data.datasets = datasets; combinedPowerChartInstance.update();
+}
 
 // UPS Standard Functions
 function toggleInputFields(upsId) { let type = document.getElementById(upsId + "-inputType").value; document.getElementById(upsId + "-input-kva").style.display = "none"; document.getElementById(upsId + "-input-percent").style.display = "none"; document.getElementById(upsId + "-input-amps").style.display = "none"; if (type === "kva") document.getElementById(upsId + "-input-kva").style.display = "flex"; else if (type === "percent") document.getElementById(upsId + "-input-percent").style.display = "flex"; else if (type === "amps") document.getElementById(upsId + "-input-amps").style.display = "flex"; }
 function filterRecordsByTime(records, filterType) { if(filterType === "all") return records; let today = new Date(); today.setHours(0,0,0,0); return records.filter(r => { let diffDays = Math.ceil(Math.abs(today - new Date(r.date)) / (1000 * 60 * 60 * 24)); if (filterType === "today") return diffDays <= 0; if (filterType === "week") return diffDays <= 7; if (filterType === "month") return diffDays <= 30; return true; }); }
-function saveAndCalculate(upsId, maxCap) { /* Logic retained */ }
-function clearData(upsId) { /* Logic retained */ }
+function saveAndCalculate(upsId, maxCap) {
+    let type = document.getElementById(upsId + "-inputType").value; let l1, l2, l3;
+    if (type === 'kva') { l1 = parseFloat(document.getElementById(upsId + "-kva-l1").value)||0; l2 = parseFloat(document.getElementById(upsId + "-kva-l2").value)||0; l3 = parseFloat(document.getElementById(upsId + "-kva-l3").value)||0; }
+    else if (type === 'percent') { l1 = (parseFloat(document.getElementById(upsId + "-perc-l1").value)||0/100)*maxCap; l2 = (parseFloat(document.getElementById(upsId + "-perc-l2").value)||0/100)*maxCap; l3 = (parseFloat(document.getElementById(upsId + "-perc-l3").value)||0/100)*maxCap; }
+    else { l1 = ((parseFloat(document.getElementById(upsId + "-amp-l1").value)||0)*415*1.732)/1000; l2 = ((parseFloat(document.getElementById(upsId + "-amp-l2").value)||0)*415*1.732)/1000; l3 = ((parseFloat(document.getElementById(upsId + "-amp-l3").value)||0)*415*1.732)/1000; }
+    let totalKva = (l1 + l2 + l3).toFixed(2); let now = new Date();
+    upsData[upsId].records.push({ date: now.toISOString().split('T')[0], time: now.toLocaleTimeString(), l1: l1.toFixed(2), l2: l2.toFixed(2), l3: l3.toFixed(2), totalKva: totalKva, inputType: type, user: activeUser || "Admin" });
+    localStorage.setItem("bmsUpsData", JSON.stringify(upsData)); alert("UPS Data Saved! Total kVA: " + totalKva); updateCombinedChart();
+}
+function clearData(upsId) { if(confirm("Clear history for this UPS?")) { upsData[upsId].records = []; localStorage.setItem("bmsUpsData", JSON.stringify(upsData)); clearLogs[upsId] = { user: activeUser, time: new Date().toLocaleString() }; localStorage.setItem("bmsClearLogs", JSON.stringify(clearLogs)); renderUpsUI(); updateCombinedChart(); } }
 function initCombinedChart() { let ctx = document.getElementById('chart-combined').getContext('2d'); combinedChartInstance = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } }); updateCombinedChart(); }
-function updateCombinedChart() { /* Logic retained */ }
-function exportData(upsId) { /* Logic retained */ }
-function emailReport(upsId) { /* Logic retained */ }
+function updateCombinedChart() {
+    if(!combinedChartInstance) return;
+    let filter = document.getElementById("all-time-filter").value; let type = document.getElementById("all-chart-type").value;
+    let labels = new Set(); let datasets = [];
+    Object.keys(upsConfigs).forEach(uId => {
+        let filtered = filterRecordsByTime(upsData[uId].records, filter); let dataMap = {};
+        filtered.forEach(r => { let label = r.date + " " + r.time; labels.add(label); dataMap[label] = r.totalKva; });
+        datasets.push({ label: upsConfigs[uId].name, data: dataMap, borderColor: upsConfigs[uId].color, fill: false });
+    });
+    let sortedLabels = Array.from(labels).sort();
+    datasets.forEach(ds => { let d = []; sortedLabels.forEach(l => d.push(ds.data[l] || 0)); ds.data = d; });
+    combinedChartInstance.config.type = type; combinedChartInstance.data.labels = sortedLabels; combinedChartInstance.data.datasets = datasets; combinedChartInstance.update();
+}
+function exportData(upsId) {
+    let csv = "Date,Time,L1,L2,L3,Total kVA,Input Format,User\n";
+    upsData[upsId].records.forEach(r => csv += `${r.date},${r.time},${r.l1},${r.l2},${r.l3},${r.totalKva},${r.inputType},${r.user}\n`);
+    downloadCSV(csv, `${upsId.toUpperCase()}_Report.csv`);
+}
+function downloadCSV(csv, filename) {
+    let link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
 
 // Google Sync
 async function syncToGoogleSheets() { 
