@@ -147,8 +147,6 @@ body {
     display: block;
 }
 
-}
-
 /* Admin User Panel */
 .admin-user-panel { border-top: 4px solid var(--danger); display: none; background: #FFF5F5; border-radius: 16px; }
 .admin-user-panel h3 { color: var(--danger-hover); margin-bottom: 15px; font-weight: 700; font-size: 18px; letter-spacing: -0.3px;}
@@ -168,9 +166,9 @@ body {
 .data-entry { background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 24px; box-shadow: var(--shadow-sm); }
 .input-group { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
 .input-group label { font-weight: 600; font-size: 13px; color: var(--text-main); display: flex; flex-direction: column; flex: 1; min-width: 140px; }
-.input-group input, .input-group select { padding: 12px 16px; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 8px; width: 100%; font-size: 14px; background: #F8FAFC; transition: all 0.2s; outline: none; color: var(--text-dark); font-weight: 500;}
-.input-group input:hover, .input-group select:hover { border-color: #CBD5E1; }
-.input-group input:focus, .input-group select:focus { background: white; border-color: var(--primary); box-shadow: var(--shadow-glow); }
+.input-group input, .input-group select, .input-group textarea { padding: 12px 16px; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 8px; width: 100%; font-size: 14px; background: #F8FAFC; transition: all 0.2s; outline: none; color: var(--text-dark); font-weight: 500;}
+.input-group input:hover, .input-group select:hover, .input-group textarea:hover { border-color: #CBD5E1; }
+.input-group input:focus, .input-group select:focus, .input-group textarea:focus { background: white; border-color: var(--primary); box-shadow: var(--shadow-glow); }
 
 .action-bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border-color); }
 .calc-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px rgba(15, 98, 254, 0.2);}
@@ -348,7 +346,15 @@ body {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> DG Sets
     </button>
     <button onclick="setActiveNav(this); showSection('maintenance')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg> Hardware Maintenance Scheduler
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg> Hardware Maintenance
+    </button>
+    
+    <!-- NEW SECTION BUTTONS: Work Report & Gallery -->
+    <button onclick="setActiveNav(this); showSection('work-report')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Work Report
+    </button>
+    <button onclick="setActiveNav(this); showSection('gallery')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Image Gallery
     </button>
     
     <div style="border-left: 1px solid var(--border-color); height: 24px; margin: 0 10px;"></div>
@@ -364,7 +370,6 @@ body {
 
 <div class="main">
     <div class="container">
-        
         <div class="section" id="bms" style="display: block;">
             <div class="card">
                 <img src="front-carousel-4.jpg" alt="P.G. Senapathy Centre for Computing Resources" class="overview-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/1200x400.png?text=Error:+Image+front-carousel-4.jpg+not+found';">
@@ -446,6 +451,84 @@ body {
                 <select id="all-dg-chart-type" onchange="updateCombinedDgChart()"><option value="line">Line Chart</option><option value="bar">Bar Chart</option></select>
             </div>
             <div class="chart-wrapper"><canvas id="chart-dg-combined"></canvas></div>
+        </div>
+
+        <!-- NEW SECTION: Operator Work Report -->
+        <div class="card section" id="work-report" style="border-top: 4px solid var(--primary);">
+            <h2>📝 Operator Work Report</h2>
+            <p style="margin-bottom: 24px; color: var(--text-main);">Log your daily shift activities. Data is synchronized directly with Google Sheets.</p>
+            
+            <div class="data-entry" style="background: #F8FAFC;">
+                <form id="workReportForm">
+                    <div class="input-group">
+                        <label>Operator Name:
+                            <input type="text" id="report-op-name" readonly style="background: #E2E8F0; cursor: not-allowed; font-weight: 600;">
+                        </label>
+                        <label>Operator ID:
+                            <input type="text" id="report-op-id" placeholder="Enter ID (e.g. OP-101)" required>
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <label>Current Time:
+                            <input type="text" id="report-time" readonly style="background: #E2E8F0; cursor: not-allowed;">
+                        </label>
+                        <label style="flex: 2;">Select Linked Sheet:
+                            <select id="report-sheet-url">
+                                <option value="YOUR_SHEET_URL_1">Main BMS Log Sheet</option>
+                                <option value="YOUR_SHEET_URL_2">Maintenance Register Sheet</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="width: 100%;">Work Description:
+                            <textarea id="report-desc" rows="4" placeholder="Describe the maintenance, checks, or faults handled during the shift..." required></textarea>
+                        </label>
+                    </div>
+                    <div class="action-bar">
+                        <button type="button" class="calc-btn btn-google" onclick="submitWorkReport()">Submit to Google Sheets</button>
+                        <span id="report-status" style="margin-left: 15px; font-size: 13px; font-weight: 600;"></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- NEW SECTION: Image Gallery -->
+        <div class="card section" id="gallery" style="border-top: 4px solid var(--success);">
+            <h2>🖼️ Site Image Gallery</h2>
+            <p style="margin-bottom: 24px; color: var(--text-main);">View site updates and maintenance photos.</p>
+
+            <!-- Slideshow Display -->
+            <div style="background: #000; border-radius: 12px; padding: 15px; text-align: center; position: relative;">
+                <img id="gallery-display-img" src="https://via.placeholder.com/800x400/1E293B/FFF?text=No+Images+Uploaded" style="width: 100%; height: 450px; object-fit: contain; border-radius: 8px; transition: opacity 0.3s;" onerror="this.src='https://placehold.co/800x400/1E293B/FFFFFF?text=No+Images+Uploaded'">
+                <div style="background: rgba(0,0,0,0.7); color: white; padding: 15px; position: absolute; bottom: 15px; left: 15px; right: 15px; border-radius: 0 0 8px 8px;">
+                    <h5 id="gallery-img-desc" style="margin: 0; font-size: 16px;">Waiting for images...</h5>
+                </div>
+                
+                <!-- Gallery Controls -->
+                <div style="position: absolute; top: 50%; width: 100%; left: 0; display: flex; justify-content: space-between; padding: 0 20px; transform: translateY(-50%);">
+                    <button onclick="changeImage(-1)" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 5px; backdrop-filter: blur(4px);">❮</button>
+                    <button onclick="changeImage(1)" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; padding: 10px 15px; border-radius: 5px; backdrop-filter: blur(4px);">❯</button>
+                </div>
+            </div>
+
+            <!-- Admin Only: Image Upload Panel -->
+            <div class="report-panel" style="margin-top: 24px;">
+                <div class="admin-lock-overlay" id="lock-gallery"><button class="admin-lock-btn" onclick="showAdminLogin()">🔒 Admin Login Required for Upload</button></div>
+                <h4 style="color: var(--success); display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Upload New Image
+                </h4>
+                <div class="input-group" style="align-items: flex-end;">
+                    <label style="flex: 2;">Select Image File:
+                        <input type="file" id="gallery-upload-file" accept="image/*" style="background: white;">
+                    </label>
+                    <label style="flex: 3;">Image Description:
+                        <input type="text" id="gallery-upload-desc" placeholder="Briefly describe the image...">
+                    </label>
+                    <button class="action-btn btn-export" onclick="uploadImageToGallery()">Upload & Update</button>
+                </div>
+                <p style="font-size: 12px; color: var(--text-main); margin-top: 10px;">Note: Images are saved locally. Connect to Google Drive script for cloud storage.</p>
+            </div>
         </div>
 
         <!-- Data Entry Sections -->
@@ -670,6 +753,7 @@ let combinedHvacChartInstance = null; let combinedDgChartInstance = null;
 window.onload = function() {
     initUserSystem(); 
     initCombinedChart(); initCombinedPowerChart(); initCombinedHvacChart(); initCombinedDgChart();
+    updateWorkReportUI(); initGallery(); // Added calls for new sections
 };
 
 function initUserSystem() {
@@ -684,7 +768,7 @@ function initUserSystem() {
 }
 
 function renderLoginDropdown() { let select = document.getElementById("loginUserSelect"); select.innerHTML = ""; bmsUsers.forEach(user => { select.innerHTML += `<option value="${user}">${user}</option>`; }); }
-function loginOperator() { let user = document.getElementById("loginUserSelect").value; if(user) { activeUser = user; sessionStorage.setItem("bmsActiveUser", activeUser); document.getElementById("operatorLoginModal").style.display = "none"; document.getElementById("activeUserDisplay").innerHTML = "👤 Logged in as: " + activeUser; } }
+function loginOperator() { let user = document.getElementById("loginUserSelect").value; if(user) { activeUser = user; sessionStorage.setItem("bmsActiveUser", activeUser); document.getElementById("operatorLoginModal").style.display = "none"; document.getElementById("activeUserDisplay").innerHTML = "👤 Logged in as: " + activeUser; updateWorkReportUI(); } }
 function systemLogout() { sessionStorage.removeItem("bmsActiveUser"); sessionStorage.removeItem("bmsIsAdmin"); location.reload(); }
 function showAdminLogin() { document.getElementById("operatorLoginModal").classList.add("hidden"); document.getElementById("adminModal").style.display = "flex"; document.getElementById("adminModal").classList.remove("hidden"); }
 function backToOperatorLogin() { document.getElementById("adminModal").classList.add("hidden"); document.getElementById("operatorLoginModal").style.display = "flex"; document.getElementById("operatorLoginModal").classList.remove("hidden"); }
@@ -707,6 +791,7 @@ function enableAdminUI() {
     if(document.getElementById("lock-power-combined")) document.getElementById("lock-power-combined").classList.add("hidden"); 
     let dgLocks = document.querySelectorAll(".admin-lock-overlay[id^='lock-dg-']"); dgLocks.forEach(l => l.classList.add("hidden"));
     let maintLocks = document.querySelectorAll(".admin-lock-overlay[id^='lock-maint-']"); maintLocks.forEach(l => l.classList.add("hidden"));
+    if(document.getElementById("lock-gallery")) document.getElementById("lock-gallery").classList.add("hidden"); // Added lock for gallery
     renderAdminUserList();
 }
 function adminLogout() { systemLogout(); }
@@ -1104,6 +1189,137 @@ async function syncToGoogleSheets() {
         document.getElementById("syncStatus").innerText = "Synced to Sheets ✓"; setTimeout(() => document.getElementById("syncStatus").style.display = "none", 3000); 
         alert("Google Sheets-ல் டேட்டா சேமிக்கப்பட்டது!");
     } catch (err) { alert("Sync Error."); console.error(err); } 
+}
+
+// ==========================================
+// 9. WORK REPORT LOGIC
+// ==========================================
+function updateWorkReportUI() {
+    let nameInput = document.getElementById('report-op-name');
+    let timeInput = document.getElementById('report-time');
+    
+    if (nameInput) {
+        nameInput.value = isAdmin ? "Admin User" : (activeUser || "Operator (Not Logged In)");
+    }
+    if (timeInput) {
+        timeInput.value = new Date().toLocaleString('en-IN');
+    }
+}
+setInterval(updateWorkReportUI, 60000); // Update time every minute
+
+async function submitWorkReport() {
+    let name = document.getElementById('report-op-name').value;
+    let id = document.getElementById('report-op-id').value;
+    let time = document.getElementById('report-time').value;
+    let desc = document.getElementById('report-desc').value;
+    let sheetUrl = document.getElementById('report-sheet-url').value;
+    let statusText = document.getElementById('report-status');
+
+    if (!id || !desc) {
+        alert("Please enter both Operator ID and Work Description.");
+        return;
+    }
+
+    statusText.style.color = "#004EEB";
+    statusText.innerText = "Submitting to Google Sheets...";
+
+    let payload = {
+        action: "work_report",
+        sheetLink: sheetUrl,
+        name: name,
+        id: id,
+        time: time,
+        desc: desc
+    };
+
+    try {
+        // Uses the global GOOGLE_APP_SCRIPT_URL for this demo
+        await fetch(GOOGLE_APP_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
+        
+        statusText.style.color = "var(--success)";
+        statusText.innerText = "Report Submitted Successfully! ✓";
+        
+        document.getElementById('report-op-id').value = "";
+        document.getElementById('report-desc').value = "";
+        setTimeout(() => { statusText.innerText = ""; }, 3000);
+    } catch (err) {
+        statusText.style.color = "var(--danger)";
+        statusText.innerText = "Submission Failed.";
+        console.error("Report submit error:", err);
+    }
+}
+
+// ==========================================
+// 10. IMAGE GALLERY LOGIC
+// ==========================================
+let localGalleryImages = JSON.parse(localStorage.getItem("bmsGallery")) || [];
+let currentImageIndex = 0;
+
+function initGallery() {
+    if (localGalleryImages.length > 0) {
+        currentImageIndex = localGalleryImages.length - 1; // Show newest first
+        updateGalleryDisplay();
+    }
+}
+
+function updateGalleryDisplay() {
+    let imgEl = document.getElementById('gallery-display-img');
+    let descEl = document.getElementById('gallery-img-desc');
+    
+    if (localGalleryImages.length === 0) {
+        imgEl.src = "https://placehold.co/800x400/1E293B/FFFFFF?text=No+Images+Uploaded";
+        descEl.innerText = "Upload images to view them here.";
+        return;
+    }
+
+    let currentImg = localGalleryImages[currentImageIndex];
+    imgEl.src = currentImg.src;
+    descEl.innerText = `${currentImg.desc} (Uploaded by: ${currentImg.user} on ${currentImg.date})`;
+}
+
+function changeImage(direction) {
+    if (localGalleryImages.length === 0) return;
+    currentImageIndex += direction;
+    if (currentImageIndex >= localGalleryImages.length) {
+        currentImageIndex = 0;
+    } else if (currentImageIndex < 0) {
+        currentImageIndex = localGalleryImages.length - 1;
+    }
+    updateGalleryDisplay();
+}
+
+function uploadImageToGallery() {
+    if (!isAdmin) {
+        alert("Only Administrators can upload images.");
+        return;
+    }
+    let fileInput = document.getElementById('gallery-upload-file');
+    let descInput = document.getElementById('gallery-upload-desc');
+
+    if (fileInput.files && fileInput.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let now = new Date();
+            let newImgData = {
+                src: e.target.result, 
+                desc: descInput.value || "BMS Site Update",
+                user: activeUser || "Admin",
+                date: now.toLocaleDateString('en-IN')
+            };
+
+            localGalleryImages.push(newImgData);
+            localStorage.setItem("bmsGallery", JSON.stringify(localGalleryImages));
+            alert("Image uploaded successfully!");
+            
+            fileInput.value = "";
+            descInput.value = "";
+            currentImageIndex = localGalleryImages.length - 1;
+            updateGalleryDisplay();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    } else {
+        alert("Please select an image file to upload.");
+    }
 }
 </script>
 </body>
